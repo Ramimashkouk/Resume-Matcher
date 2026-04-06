@@ -884,11 +884,11 @@ const ResumeBuilderContent = () => {
 
               {/* Cover Letter Preview */}
               {activeTab === 'cover-letter' &&
-                (coverLetter && resumeData.personalInfo ? (
+                (coverLetter ? (
                   <div className="p-6">
                     <CoverLetterPreview
                       content={coverLetter}
-                      personalInfo={resumeData.personalInfo}
+                      personalInfo={resumeData.personalInfo || {}}
                       pageSize={templateSettings.pageSize}
                     />
                   </div>

@@ -95,6 +95,27 @@ function normalizeResumeId(resumeId: string): string {
   return normalized;
 }
 
+async function readErrorMessage(response: Response): Promise<string> {
+  const text = await response.text().catch(() => '');
+  if (!text) {
+    return 'Request failed.';
+  }
+
+  try {
+    const parsed = JSON.parse(text) as { detail?: unknown; message?: unknown };
+    if (typeof parsed.detail === 'string' && parsed.detail.trim()) {
+      return parsed.detail;
+    }
+    if (typeof parsed.message === 'string' && parsed.message.trim()) {
+      return parsed.message;
+    }
+  } catch {
+    // Keep the raw text when the response is not JSON.
+  }
+
+  return text;
+}
+
 export interface ResumeListItem {
   resume_id: string;
   filename: string | null;
@@ -259,8 +280,8 @@ export async function downloadResumePdf(
   const url = getResumePdfUrl(resumeId, settings, locale);
   const res = await apiFetch(url);
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Failed to download resume (status ${res.status}): ${text}`);
+    const message = await readErrorMessage(res);
+    throw new Error(`Failed to download resume (status ${res.status}): ${message}`);
   }
   return await res.blob();
 }
@@ -325,8 +346,8 @@ export async function downloadCoverLetterPdf(
   const url = getCoverLetterPdfUrl(resumeId, pageSize, locale);
   const res = await apiFetch(url);
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Failed to download cover letter (status ${res.status}): ${text}`);
+    const message = await readErrorMessage(res);
+    throw new Error(`Failed to download cover letter (status ${res.status}): ${message}`);
   }
   return await res.blob();
 }

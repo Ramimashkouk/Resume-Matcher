@@ -192,4 +192,7 @@ RULES:
 - Keep skills concise and industry-standard
 - Group similar technologies if appropriate
 - Prioritize most relevant skills based on feedback
-- Only include skills that already exist in CURRENT SKILLS or are explicitly provided in USER'S FEEDBACK"""
+- You MAY remove outdated or lower-priority skills when needed
+- You MAY add skills only if they already exist in CURRENT SKILLS or are explicitly provided in USER'S FEEDBACK
+- Return a deduplicated list with a hard maximum of 12 skills
+- Keep the most relevant and specific 12 skills when trimming"""

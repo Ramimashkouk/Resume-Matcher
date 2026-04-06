@@ -38,7 +38,7 @@ export interface Education {
   institution?: string;
   degree?: string;
   years?: string;
-  description?: string;
+  description?: string[];
 }
 
 export interface Project {

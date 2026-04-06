@@ -154,12 +154,12 @@ class Education(BaseModel):
     institution: str = ""
     degree: str = ""
     years: str = ""
-    description: str | None = None
+    description: list[str] | None = None
 
     @field_validator("description", mode="before")
     @classmethod
-    def _normalize_description(cls, value: Any) -> str | None:
-        return _coerce_optional_text(value)
+    def _normalize_description(cls, value: Any) -> list[str] | None:
+        return _coerce_string_list(value)
 
 
 class Project(BaseModel):

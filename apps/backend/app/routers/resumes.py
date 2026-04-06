@@ -263,11 +263,12 @@ def _preserve_original_skills(
     original_data: dict[str, Any] | None,
     improved_data: dict[str, Any],
 ) -> dict[str, Any]:
-    """Restore any skills, certs, languages, or awards dropped by the LLM.
+    """Restore non-skill profile lists dropped by the LLM.
 
-    This is a hard safety net: regardless of what the LLM returns, no
-    original item from these lists is ever lost.  Dropped items are
-    appended at the end of the improved list.
+    Technical skills are intentionally excluded from this restoration logic
+    so the model can add/remove/reprioritize them per job and keep the list
+    focused. Non-skill profile lists still use strict restoration to prevent
+    accidental data loss.
     """
     if not original_data:
         return improved_data
@@ -279,8 +280,28 @@ def _preserve_original_skills(
         return result
     result_additional = result.setdefault("additional", {})
 
+    # Keep technical skills editable, but normalize them to a concise list.
+    # This prevents unbounded growth while preserving the model's relevance ordering.
+    technical_skills = result_additional.get("technicalSkills", [])
+    if isinstance(technical_skills, list):
+        normalized_skills: list[str] = []
+        seen_skills: set[str] = set()
+        for item in technical_skills:
+            if not isinstance(item, str):
+                continue
+            cleaned = item.strip()
+            if not cleaned:
+                continue
+            key = cleaned.casefold()
+            if key in seen_skills:
+                continue
+            normalized_skills.append(cleaned)
+            seen_skills.add(key)
+            if len(normalized_skills) >= 12:
+                break
+        result_additional["technicalSkills"] = normalized_skills
+
     list_fields = [
-        "technicalSkills",
         "certificationsTraining",
         "languages",
         "awards",

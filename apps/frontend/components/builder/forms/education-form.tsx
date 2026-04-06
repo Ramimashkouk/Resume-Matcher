@@ -4,7 +4,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Education } from '@/components/dashboard/resume-component';
 import { Plus, Trash2 } from 'lucide-react';
 import { useTranslations } from '@/lib/i18n';
@@ -66,7 +66,7 @@ export const EducationForm: React.FC<EducationFormProps> = ({ data, onChange }) 
         institution: '',
         degree: '',
         years: '',
-        description: '',
+        description: [''],
       },
     ]);
   };
@@ -75,11 +75,48 @@ export const EducationForm: React.FC<EducationFormProps> = ({ data, onChange }) 
     onChange(data.filter((item) => item.id !== id));
   };
 
-  const handleChange = (id: number, field: keyof Education, value: string) => {
+  const handleChange = (id: number, field: keyof Education, value: string | string[]) => {
     onChange(
       data.map((item) => {
         if (item.id === id) {
           return { ...item, [field]: value };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleDescriptionChange = (id: number, index: number, value: string) => {
+    onChange(
+      data.map((item) => {
+        if (item.id === id) {
+          const newDesc = [...(item.description || [])];
+          newDesc[index] = value;
+          return { ...item, description: newDesc };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleAddDescription = (id: number) => {
+    onChange(
+      data.map((item) => {
+        if (item.id === id) {
+          return { ...item, description: [...(item.description || []), ''] };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleRemoveDescription = (id: number, index: number) => {
+    onChange(
+      data.map((item) => {
+        if (item.id === id) {
+          const newDesc = [...(item.description || [])];
+          newDesc.splice(index, 1);
+          return { ...item, description: newDesc };
         }
         return item;
       })
@@ -168,16 +205,41 @@ export const EducationForm: React.FC<EducationFormProps> = ({ data, onChange }) 
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="font-mono text-xs uppercase tracking-wider text-gray-500">
-                        {t('builder.forms.education.fields.descriptionOptional')}
-                      </Label>
-                      <Textarea
-                        value={item.description || ''}
-                        onChange={(e) => handleChange(item.id, 'description', e.target.value)}
-                        className="min-h-[60px] text-black text-sm rounded-none border-black bg-white"
-                        placeholder={t('builder.forms.education.placeholders.description')}
-                      />
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <Label className="font-mono text-xs uppercase tracking-wider text-gray-500">
+                          {t('builder.genericItemForm.fields.descriptionPoints')}
+                        </Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAddDescription(item.id)}
+                          className="h-6 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />{' '}
+                          {t('builder.genericItemForm.actions.addPoint')}
+                        </Button>
+                      </div>
+                      {item.description?.map((desc, idx) => (
+                        <div key={idx} className="flex gap-2">
+                          <div className="flex-1">
+                            <RichTextEditor
+                              value={desc}
+                              onChange={(html) => handleDescriptionChange(item.id, idx, html)}
+                              placeholder={t('builder.forms.education.placeholders.description')}
+                              minHeight="60px"
+                            />
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveDescription(item.id, idx)}
+                            className="h-[60px] w-8 text-muted-foreground hover:text-destructive self-end"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </DraggableListItem>

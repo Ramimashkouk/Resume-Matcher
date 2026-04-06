@@ -28,6 +28,7 @@ _browser: Optional[Browser] = None
 _init_lock = asyncio.Lock()  # Lock to prevent race condition during initialization
 _subprocess_lock = asyncio.Lock()
 _subprocess_supported = True
+PDF_BROWSER_EXECUTABLE_ENV = "PDF_BROWSER_EXECUTABLE"
 
 
 async def init_pdf_renderer() -> None:
@@ -70,8 +71,73 @@ def _resolve_pdf_margins(margins: Optional[dict]) -> dict:
     return {"top": "10mm", "right": "10mm", "bottom": "10mm", "left": "10mm"}
 
 
+def _get_playwright_install_command() -> str:
+    exe = sys.executable.replace("\\", "/")
+    return f"{exe} -m playwright install chromium"
+
+
+def _is_snap_executable(candidate: Path) -> bool:
+    try:
+        resolved = candidate.resolve()
+    except OSError:
+        resolved = candidate
+    resolved_str = str(resolved)
+    return resolved_str == "/snap/bin/chromium" or resolved_str.startswith("/snap/")
+
+
+def _get_configured_browser_override() -> Optional[str]:
+    override = os.environ.get(PDF_BROWSER_EXECUTABLE_ENV, "").strip()
+    if not override:
+        return None
+
+    candidate = Path(override).expanduser()
+    if not candidate.exists():
+        raise PDFRenderError(
+            f"{PDF_BROWSER_EXECUTABLE_ENV} is set to '{candidate}', but that executable "
+            "was not found."
+        )
+    return str(candidate)
+
+
+def _build_missing_browser_message(*, snap_detected: bool) -> str:
+    command = _get_playwright_install_command()
+    if snap_detected and sys.platform.startswith("linux"):
+        return (
+            "Playwright browser executable is missing. Snap Chromium was detected, but "
+            "Snap-packaged Chromium is not a reliable PDF fallback in this environment. "
+            "Install Playwright's bundled browser with "
+            f"'{command}', install a non-Snap Chrome/Chromium build, or set "
+            f"{PDF_BROWSER_EXECUTABLE_ENV} to a working browser path."
+        )
+
+    return (
+        "Playwright browser executable is missing, and no compatible system "
+        "Chrome/Chromium/Edge installation was found. Install Playwright's bundled "
+        f"browser with '{command}', install Chrome/Chromium/Edge, or set "
+        f"{PDF_BROWSER_EXECUTABLE_ENV} to a working browser path."
+    )
+
+
+def _find_snap_chromium_executable() -> Optional[str]:
+    if not sys.platform.startswith("linux"):
+        return None
+
+    candidates = [
+        Path("/snap/bin/chromium"),
+        Path("/snap/chromium/current/usr/lib/chromium-browser/chrome"),
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    return None
+
+
 def _find_chromium_executable() -> Optional[str]:
     """Find system Chrome/Chromium/Edge executable across platforms."""
+    override = _get_configured_browser_override()
+    if override:
+        return override
+
     if sys.platform == "win32":
         candidates = [
             Path(os.environ.get("PROGRAMFILES", "C:/Program Files"))
@@ -91,14 +157,15 @@ def _find_chromium_executable() -> Optional[str]:
             Path("/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"),
         ]
     else:
-        # Linux paths: standard locations, Snap, and Flatpak
+        # Linux paths: standard locations and Flatpak. Snap Chromium is intentionally
+        # excluded from the automatic fallback because it exits under Playwright in
+        # common non-snap development environments.
         candidates = [
             Path("/usr/bin/google-chrome"),
             Path("/usr/bin/google-chrome-stable"),
             Path("/usr/bin/chromium"),
             Path("/usr/bin/chromium-browser"),
             Path("/usr/bin/microsoft-edge"),
-            Path("/snap/bin/chromium"),
             Path("/var/lib/flatpak/exports/bin/com.google.Chrome"),
             Path("/var/lib/flatpak/exports/bin/org.chromium.Chromium"),
             Path(os.path.expanduser("~/.local/share/flatpak/exports/bin/com.google.Chrome")),
@@ -106,7 +173,7 @@ def _find_chromium_executable() -> Optional[str]:
         ]
 
     for candidate in candidates:
-        if candidate.exists():
+        if candidate.exists() and not _is_snap_executable(candidate):
             return str(candidate)
     return None
 
@@ -120,8 +187,9 @@ async def _launch_browser(playwright: Playwright) -> Browser:
         fallback_executable = _find_chromium_executable()
         if not fallback_executable:
             raise PDFRenderError(
-                "Playwright browser executable is missing, and no system Chrome/Edge "
-                "installation was found. Install Playwright browsers or install Chrome/Edge."
+                _build_missing_browser_message(
+                    snap_detected=_find_snap_chromium_executable() is not None
+                )
             ) from e
         return await playwright.chromium.launch(executable_path=fallback_executable)
 
@@ -209,13 +277,16 @@ async def _render_resume_pdf_in_thread(
 def _raise_playwright_error(error: PlaywrightError, url: str) -> NoReturn:
     error_msg = str(error)
     if "Executable doesn't exist" in error_msg:
-        exe = sys.executable.replace("\\", "/")
-        command = f"{exe} -m playwright install chromium"
         raise PDFRenderError(
             "Playwright browser executable is missing or out of date. "
             "Command shown for reference; quote the path if it contains spaces: "
-            f"{command}"
+            f"{_get_playwright_install_command()}"
         ) from error
+    if (
+        "Target page, context or browser has been closed" in error_msg
+        and ("/snap/bin/chromium" in error_msg or "/snap/chromium/" in error_msg)
+    ):
+        raise PDFRenderError(_build_missing_browser_message(snap_detected=True)) from error
     if "net::ERR_CONNECTION_REFUSED" in error_msg:
         raise PDFRenderError(
             f"Cannot connect to frontend for PDF generation. "

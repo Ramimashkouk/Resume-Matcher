@@ -349,10 +349,17 @@ export const ResumeModernTwoColumn: React.FC<ResumeModernTwoColumnProps> = ({
                       )}
                     </h4>
                     <p className={baseStyles['resume-item-subtitle-sm']}>{edu.degree}</p>
-                    {edu.description && (
-                      <p className={`${baseStyles['resume-text-xs']} ${baseStyles['resume-meta']}`}>
-                        {edu.description}
-                      </p>
+                    {edu.description && edu.description.length > 0 && (
+                      <ul className={`mt-1 ml-3 ${baseStyles['resume-text-xs']} space-y-1`}>
+                        {edu.description.map((desc, index) => (
+                          <li key={index} className="flex">
+                            <span className="mr-1.5 flex-shrink-0 text-[10px]">•</span>
+                            <span className="flex-1">
+                              <SafeHtml html={desc} />
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
                 ))}

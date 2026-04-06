@@ -196,7 +196,7 @@ Job description:
 {job_description}"""
 
 CRITICAL_TRUTHFULNESS_RULES_TEMPLATE = """CRITICAL TRUTHFULNESS RULES - NEVER VIOLATE:
-1. DO NOT add any skill, tool, technology, or certification that is not explicitly mentioned in the original resume
+1. Do NOT add certifications, languages, awards, company names, product names, or dates that are not supported by the original resume
 2. DO NOT invent numeric achievements (e.g., "increased by 30%") unless they exist in original
 3. DO NOT add company names, product names, or technical terms not in the original
 4. DO NOT upgrade experience level (e.g., "Junior" -> "Senior")
@@ -204,7 +204,8 @@ CRITICAL_TRUTHFULNESS_RULES_TEMPLATE = """CRITICAL TRUTHFULNESS RULES - NEVER VI
 6. DO NOT extend employment dates or change timelines. Copy date ranges exactly as they appear, including months.
 7. {rule_7}
 8. Preserve factual accuracy - only use information provided by the candidate
-9. NEVER remove existing skills, certifications, languages, or awards. You may reorder by relevance, but every original item must remain.
+9. For technical skills only: you may add/reorder/remove skills to improve job relevance, but keep the list factual, deduplicated, and capped at 12 items.
+10. For certifications, languages, and awards: never remove original items.
 
 Violation of these rules could cause serious problems for the candidate in job interviews.
 """
@@ -267,6 +268,7 @@ Do NOT include personalInfo in your output - it will be preserved from the origi
 Rules:
 - Strengthen alignment by weaving in relevant keywords where evidence already exists
 - You may rephrase bullet points to include keyword phrasing
+- You have to delete non-relevant bullet points to make room for stronger keyword matches, There shouldn't be more than 4 bullet points for DeepPavlov role, and 3 for other roles after this process.
 - Do NOT introduce new skills, tools, or certifications not in the resume
 - Do NOT change role, industry, or seniority level
 - For customSections: preserve exact structure, item count, titles, subtitles, and years. If an item's description is an empty array [] in the original, keep it empty []. Do NOT generate descriptions for items that had none.
@@ -361,7 +363,7 @@ Requirements:
 - 3-4 short paragraphs
 - Opening: Reference ONE specific thing from the job description (product, tech stack, or problem they're solving) - not generic excitement about "the role"
 - Middle: Pick 1-2 qualifications from resume that DIRECTLY match stated requirements - prioritize relevance over impressiveness
-- Closing: Simple availability to discuss, no desperate enthusiasm
+- Closing: Simple availability to discuss, readiness to relocate if necessary, no desperate enthusiasm
 - If resume shows career transition, frame the pivot as intentional and relevant
 - Extract company name from job description - do not use placeholders
 - Do NOT invent information not in the resume

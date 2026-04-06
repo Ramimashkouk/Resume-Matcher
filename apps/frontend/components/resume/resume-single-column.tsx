@@ -255,8 +255,19 @@ export const ResumeSingleColumn: React.FC<ResumeSingleColumnProps> = ({
                   >
                     <span>{edu.degree}</span>
                   </div>
-                  {edu.description && (
-                    <p className={baseStyles['resume-text-sm']}>{edu.description}</p>
+                  {edu.description && edu.description.length > 0 && (
+                    <ul
+                      className={`ml-4 ${baseStyles['resume-list']} ${baseStyles['resume-text-sm']}`}
+                    >
+                      {edu.description.map((desc, index) => (
+                        <li key={index} className="flex">
+                          <span className="mr-1.5 flex-shrink-0">•&nbsp;</span>
+                          <span>
+                            <SafeHtml html={desc} />
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
               ))}
