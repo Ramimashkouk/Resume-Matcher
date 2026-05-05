@@ -1,10 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PersonalInfo } from '@/components/dashboard/resume-component';
 import { useTranslations } from '@/lib/i18n';
+
+const MAX_PHOTO_BYTES = 2 * 1024 * 1024; // 2 MB
 
 interface PersonalInfoFormProps {
   data: PersonalInfo;
@@ -13,6 +15,7 @@ interface PersonalInfoFormProps {
 
 export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onChange }) => {
   const { t } = useTranslations();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (field: keyof PersonalInfo, value: string) => {
     onChange({
@@ -21,11 +24,76 @@ export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onChan
     });
   };
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_PHOTO_BYTES) {
+      alert(t('builder.personalInfoForm.photoTooLarge'));
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result = ev.target?.result;
+      if (typeof result === 'string') {
+        onChange({ ...data, photo: result });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    onChange({ ...data, photo: undefined });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   return (
     <div className="space-y-4 border border-black p-6 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">
       <h3 className="font-serif text-xl font-bold border-b border-black pb-2 mb-4">
         {t('builder.personalInfo')}
       </h3>
+
+      {/* Photo upload */}
+      <div className="space-y-2 mb-2">
+        <Label className="font-mono text-xs uppercase tracking-wider text-gray-500">
+          {t('builder.personalInfoForm.photo')}
+        </Label>
+        <div className="flex items-center gap-4">
+          {data.photo ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={data.photo}
+                alt="Profile photo"
+                className="w-16 h-16 rounded-full object-cover border border-black"
+              />
+              <button
+                type="button"
+                onClick={handleRemovePhoto}
+                className="font-mono text-xs uppercase tracking-wider border border-black px-3 py-1 hover:bg-black hover:text-white transition-colors"
+              >
+                {t('builder.personalInfoForm.removePhoto')}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="font-mono text-xs uppercase tracking-wider border border-black px-3 py-1 hover:bg-black hover:text-white transition-colors"
+            >
+              {t('builder.personalInfoForm.uploadPhoto')}
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label

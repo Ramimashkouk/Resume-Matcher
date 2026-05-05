@@ -419,6 +419,10 @@
       "resetDefaults": "デフォルトに戻す"
     },
     "personalInfoForm": {
+      "photo": "プロフィール写真",
+      "uploadPhoto": "写真をアップロード",
+      "removePhoto": "写真を削除",
+      "photoTooLarge": "画像は2MB未満にしてください。",
       "placeholders": {
         "name": "山田 太郎",
         "title": "ソフトウェアエンジニア",

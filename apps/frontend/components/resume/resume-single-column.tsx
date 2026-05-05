@@ -303,6 +303,17 @@ export const ResumeSingleColumn: React.FC<ResumeSingleColumnProps> = ({
           className={`text-center ${baseStyles['resume-header']} border-b`}
           style={{ borderColor: 'var(--resume-border-primary)' }}
         >
+          {/* Profile Photo - Centered */}
+          {personalInfo.photo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={personalInfo.photo}
+              alt="Profile"
+              className="mx-auto mb-2 rounded-full object-cover border border-black"
+              style={{ width: '72px', height: '72px' }}
+            />
+          )}
+
           {/* Name - Centered */}
           {personalInfo.name && (
             <h1 className={`${baseStyles['resume-name']} tracking-tight uppercase mb-1`}>

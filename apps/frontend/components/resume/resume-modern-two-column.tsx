@@ -130,22 +130,36 @@ export const ResumeModernTwoColumn: React.FC<ResumeModernTwoColumnProps> = ({
     <>
       {/* Header */}
       <div className={baseStyles['resume-header']}>
-        <h1 className={`${baseStyles['resume-name']} ${styles.nameAccent}`}>
-          {personalInfo?.name || nameFallback}
-        </h1>
-        {personalInfo?.title && (
-          <div className={`${baseStyles['resume-title']} mt-1`}>{personalInfo.title}</div>
-        )}
-        {personalInfo && (
-          <div className={`${baseStyles['resume-meta']} flex flex-wrap gap-x-3 gap-y-1 mt-2`}>
-            {renderContactDetail('Email', personalInfo.email, 'mailto:')}
-            {renderContactDetail('Phone', personalInfo.phone, 'tel:')}
-            {renderContactDetail('Location', personalInfo.location)}
-            {renderContactDetail('Website', personalInfo.website)}
-            {renderContactDetail('LinkedIn', personalInfo.linkedin)}
-            {renderContactDetail('GitHub', personalInfo.github)}
+        <div className="flex items-center gap-4">
+          {/* Profile Photo */}
+          {personalInfo?.photo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={personalInfo.photo}
+              alt="Profile"
+              className="rounded-full object-cover border border-black flex-shrink-0"
+              style={{ width: '72px', height: '72px' }}
+            />
+          )}
+          <div className="flex-1">
+            <h1 className={`${baseStyles['resume-name']} ${styles.nameAccent}`}>
+              {personalInfo?.name || nameFallback}
+            </h1>
+            {personalInfo?.title && (
+              <div className={`${baseStyles['resume-title']} mt-1`}>{personalInfo.title}</div>
+            )}
+            {personalInfo && (
+              <div className={`${baseStyles['resume-meta']} flex flex-wrap gap-x-3 gap-y-1 mt-2`}>
+                {renderContactDetail('Email', personalInfo.email, 'mailto:')}
+                {renderContactDetail('Phone', personalInfo.phone, 'tel:')}
+                {renderContactDetail('Location', personalInfo.location)}
+                {renderContactDetail('Website', personalInfo.website)}
+                {renderContactDetail('LinkedIn', personalInfo.linkedin)}
+                {renderContactDetail('GitHub', personalInfo.github)}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Two-Column Grid */}

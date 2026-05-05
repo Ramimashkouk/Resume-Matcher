@@ -419,6 +419,10 @@
       "resetDefaults": "Restablecer valores"
     },
     "personalInfoForm": {
+      "photo": "Foto de perfil",
+      "uploadPhoto": "Subir foto",
+      "removePhoto": "Eliminar foto",
+      "photoTooLarge": "La imagen debe ser menor de 2 MB.",
       "placeholders": {
         "name": "Juan Pérez",
         "title": "Ingeniero de software",

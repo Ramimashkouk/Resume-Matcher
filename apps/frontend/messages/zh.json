@@ -419,6 +419,10 @@
       "resetDefaults": "恢复默认设置"
     },
     "personalInfoForm": {
+      "photo": "个人照片",
+      "uploadPhoto": "上传照片",
+      "removePhoto": "删除照片",
+      "photoTooLarge": "图片必须小于 2 MB。",
       "placeholders": {
         "name": "张三",
         "title": "软件工程师",

@@ -302,6 +302,17 @@ export const ResumeModern: React.FC<ResumeModernProps> = ({
       {/* Header Section - Centered Layout (always first) */}
       {personalInfo && (
         <header className={`text-center ${baseStyles['resume-header']}`}>
+          {/* Profile Photo - Centered */}
+          {personalInfo.photo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={personalInfo.photo}
+              alt="Profile"
+              className="mx-auto mb-2 rounded-full object-cover border border-black"
+              style={{ width: '72px', height: '72px' }}
+            />
+          )}
+
           {/* Name - Centered */}
           {personalInfo.name && (
             <h1 className={`${baseStyles['resume-name']} tracking-tight uppercase mb-1`}>

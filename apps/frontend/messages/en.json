@@ -419,6 +419,10 @@
       "resetDefaults": "Reset to Defaults"
     },
     "personalInfoForm": {
+      "photo": "Profile Photo",
+      "uploadPhoto": "Upload Photo",
+      "removePhoto": "Remove Photo",
+      "photoTooLarge": "Image must be smaller than 2 MB.",
       "placeholders": {
         "name": "John Doe",
         "title": "Software Engineer",

@@ -419,6 +419,10 @@
       "resetDefaults": "Restaurar Padrões"
     },
     "personalInfoForm": {
+      "photo": "Foto de perfil",
+      "uploadPhoto": "Enviar foto",
+      "removePhoto": "Remover foto",
+      "photoTooLarge": "A imagem deve ter menos de 2 MB.",
       "placeholders": {
         "name": "João Silva",
         "title": "Engenheiro de Software",

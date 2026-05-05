@@ -129,6 +129,7 @@ class PersonalInfo(BaseModel):
     website: str | None = None
     linkedin: str | None = None
     github: str | None = None
+    photo: str | None = None
 
 
 class Experience(BaseModel):
