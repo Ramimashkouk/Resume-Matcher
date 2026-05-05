@@ -385,9 +385,12 @@ export async function retryProcessing(resumeId: string): Promise<ResumeUploadRes
 }
 
 /** Fetches the job description used to tailor a resume */
-export async function fetchJobDescription(
-  resumeId: string
-): Promise<{ job_id: string; content: string }> {
+export async function fetchJobDescription(resumeId: string): Promise<{
+  job_id: string;
+  content: string;
+  required_skills?: string[];
+  preferred_skills?: string[];
+}> {
   const res = await apiFetch(`/resumes/${encodeURIComponent(resumeId)}/job-description`);
   if (!res.ok) {
     const text = await res.text().catch(() => '');

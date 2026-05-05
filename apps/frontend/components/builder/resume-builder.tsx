@@ -155,6 +155,7 @@ const ResumeBuilderContent = () => {
 
   // JD comparison state
   const [jobDescription, setJobDescription] = useState<string | null>(null);
+  const [jobRequiredSkills, setJobRequiredSkills] = useState<string[]>([]);
 
   // AI Regenerate wizard
   const regenerateWizard = useRegenerateWizard({
@@ -370,17 +371,23 @@ const ResumeBuilderContent = () => {
           const data = await fetchJobDescription(resumeId);
           if (!cancelled) {
             setJobDescription(data.content);
+            const skills = Array.from(
+              new Set([...(data.required_skills || []), ...(data.preferred_skills || [])])
+            ).sort((a, b) => a.localeCompare(b));
+            setJobRequiredSkills(skills);
           }
         } catch (err) {
           // JD might not be available for older resumes
           if (!cancelled) {
             console.warn('Could not fetch job description:', err);
             setJobDescription(null);
+            setJobRequiredSkills([]);
           }
         }
       } else {
         // Clear job description when switching to non-tailored resume
         setJobDescription(null);
+        setJobRequiredSkills([]);
       }
     };
 
@@ -803,6 +810,38 @@ const ResumeBuilderContent = () => {
                     <p className="text-sm text-gray-600 leading-relaxed">
                       {t('builder.jdMatch.aboutDescription')}
                     </p>
+                  </div>
+
+                  <div className="border-2 border-black bg-white p-4">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <h3 className="font-mono text-sm font-bold uppercase">
+                        {t('builder.jdMatch.requiredSkillsTitle')}
+                      </h3>
+                      <span className="font-mono text-xs text-gray-600">
+                        {t('builder.jdMatch.skillsIdentified', {
+                          count: jobRequiredSkills.length,
+                        })}
+                      </span>
+                    </div>
+
+                    {jobRequiredSkills.length > 0 ? (
+                      <div className="max-h-48 overflow-y-auto border border-black bg-[#F0F0E8] p-2">
+                        <div className="flex flex-wrap gap-2">
+                          {jobRequiredSkills.map((skill) => (
+                            <span
+                              key={skill}
+                              className="inline-flex items-center border border-black bg-yellow-200 px-2 py-1 font-mono text-xs"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600">
+                        {t('builder.jdMatch.noSkillsIdentified')}
+                      </p>
+                    )}
                   </div>
 
                   <div className="border-2 border-black bg-[#F0F0E8] p-4">

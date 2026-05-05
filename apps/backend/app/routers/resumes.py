@@ -1680,9 +1680,37 @@ async def get_job_description_for_resume(resume_id: str) -> dict:
             detail="The associated job description was not found.",
         )
 
+    # Return structured skill signals used by JD Match UI.
+    job_keywords = job.get("job_keywords")
+    job_keywords_hash = job.get("job_keywords_hash")
+    content_hash = _hash_job_content(job["content"])
+
+    if not isinstance(job_keywords, dict) or job_keywords_hash != content_hash:
+        try:
+            job_keywords = await extract_job_keywords(job["content"])
+            db.update_job(
+                job["job_id"],
+                {
+                    "job_keywords": job_keywords,
+                    "job_keywords_hash": content_hash,
+                },
+            )
+        except Exception as e:
+            logger.warning(
+                "Failed to extract job keywords for job %s: %s",
+                job["job_id"],
+                e,
+            )
+            job_keywords = {}
+
+    required_skills = [str(s) for s in job_keywords.get("required_skills", [])]
+    preferred_skills = [str(s) for s in job_keywords.get("preferred_skills", [])]
+
     return {
         "job_id": job["job_id"],
         "content": job["content"],
+        "required_skills": required_skills,
+        "preferred_skills": preferred_skills,
     }
 
 
