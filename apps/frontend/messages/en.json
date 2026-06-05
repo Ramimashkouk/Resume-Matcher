@@ -60,6 +60,8 @@
     "viewResume": "View Resume",
     "editResume": "Edit Resume",
     "deleteResume": "Delete Resume",
+    "duplicateResume": "Duplicate Resume",
+    "duplicatingResume": "Duplicating...",
     "downloadPdf": "Download PDF",
     "tailorResume": "Tailor for Job",
     "selectModule": "Select Module",

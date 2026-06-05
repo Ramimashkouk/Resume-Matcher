@@ -60,6 +60,8 @@
     "viewResume": "查看简历",
     "editResume": "编辑简历",
     "deleteResume": "删除简历",
+    "duplicateResume": "复制简历",
+    "duplicatingResume": "复制中...",
     "downloadPdf": "下载PDF",
     "tailorResume": "为职位定制",
     "selectModule": "选择模块",

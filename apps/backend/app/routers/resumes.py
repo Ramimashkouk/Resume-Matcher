@@ -1318,6 +1318,34 @@ async def update_resume_endpoint(
     )
 
 
+@router.post("/{resume_id}/clone", response_model=ResumeUploadResponse)
+async def clone_resume_endpoint(resume_id: str) -> ResumeUploadResponse:
+    """Clone an existing resume into a new standalone resume record."""
+    resume = db.get_resume(resume_id)
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume not found")
+
+    if resume.get("is_master"):
+        raise HTTPException(
+            status_code=400,
+            detail="The master resume cannot be duplicated.",
+        )
+
+    try:
+        cloned = db.clone_resume(resume_id)
+    except ValueError as e:
+        logger.warning("Failed to clone resume %s: %s", resume_id, e)
+        raise HTTPException(status_code=404, detail="Resume not found")
+
+    return ResumeUploadResponse(
+        message="Resume copied successfully",
+        request_id=str(uuid4()),
+        resume_id=cloned["resume_id"],
+        processing_status=cloned.get("processing_status", "pending"),
+        is_master=cloned.get("is_master", False),
+    )
+
+
 @router.get("/{resume_id}/pdf")
 async def download_resume_pdf(
     resume_id: str,

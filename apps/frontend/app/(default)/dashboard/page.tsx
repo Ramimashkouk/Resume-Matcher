@@ -17,8 +17,10 @@ import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Settings from 'lucide-react/dist/esm/icons/settings';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
+import Copy from 'lucide-react/dist/esm/icons/copy';
 
 import {
+  cloneResume,
   fetchResume,
   fetchResumeList,
   deleteResume,
@@ -38,6 +40,7 @@ export default function DashboardPage() {
   const [tailoredResumes, setTailoredResumes] = useState<ResumeListItem[]>([]);
   const [isRetrying, setIsRetrying] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [cloningResumeId, setCloningResumeId] = useState<string | null>(null);
   const router = useRouter();
 
   // Status cache for optimistic counter updates and LLM status check
@@ -206,6 +209,21 @@ export default function DashboardPage() {
       setProcessingStatus('failed');
     } finally {
       setIsRetrying(false);
+    }
+  };
+
+  const handleCloneResume = async (e: React.MouseEvent, resumeId: string) => {
+    e.stopPropagation();
+    if (cloningResumeId === resumeId) return;
+
+    setCloningResumeId(resumeId);
+    try {
+      await cloneResume(resumeId);
+      await loadTailoredResumes();
+    } catch (err) {
+      console.error('Failed to clone resume:', err);
+    } finally {
+      setCloningResumeId(null);
     }
   };
 
@@ -455,6 +473,7 @@ export default function DashboardPage() {
           const title =
             resume.title || resume.jobSnippet || resume.filename || t('dashboard.tailoredResume');
           const color = cardPalette[hashTitle(title) % cardPalette.length];
+          const isCloning = cloningResumeId === resume.resume_id;
           return (
             <Card
               key={resume.resume_id}
@@ -470,9 +489,31 @@ export default function DashboardPage() {
                   >
                     <span className="font-mono font-bold">{getMonogram(title)}</span>
                   </div>
-                  <span className="font-mono text-xs text-gray-500 uppercase">
-                    {resume.processing_status}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-xs text-gray-500 uppercase">
+                      {resume.processing_status}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-none border border-transparent text-gray-600 hover:border-black hover:bg-white hover:text-black"
+                      onClick={(event) => handleCloneResume(event, resume.resume_id)}
+                      disabled={isCloning}
+                      aria-label={t('dashboard.duplicateResume')}
+                      title={
+                        isCloning
+                          ? t('dashboard.duplicatingResume')
+                          : t('dashboard.duplicateResume')
+                      }
+                    >
+                      {isCloning ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <CardTitle className="text-lg">
                   <span className="block font-serif text-base font-bold leading-tight mb-1 w-full line-clamp-2">

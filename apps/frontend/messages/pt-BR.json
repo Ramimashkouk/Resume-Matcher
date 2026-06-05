@@ -60,6 +60,8 @@
     "viewResume": "Ver Currículo",
     "editResume": "Editar Currículo",
     "deleteResume": "Excluir Currículo",
+    "duplicateResume": "Duplicar currículo",
+    "duplicatingResume": "Duplicando...",
     "downloadPdf": "Baixar PDF",
     "tailorResume": "Personalizar para Vaga",
     "selectModule": "Selecionar Módulo",

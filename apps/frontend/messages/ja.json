@@ -60,6 +60,8 @@
     "viewResume": "履歴書を見る",
     "editResume": "履歴書を編集",
     "deleteResume": "履歴書を削除",
+    "duplicateResume": "履歴書を複製",
+    "duplicatingResume": "複製中...",
     "downloadPdf": "PDFをダウンロード",
     "tailorResume": "求人に合わせてカスタマイズ",
     "selectModule": "モジュールを選択",

@@ -25,6 +25,7 @@ export {
   fetchResume,
   fetchResumeList,
   updateResume,
+  cloneResume,
   downloadResumePdf,
   deleteResume,
   type ResumeListItem,

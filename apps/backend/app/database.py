@@ -1,6 +1,7 @@
 """TinyDB database layer for JSON storage."""
 
 import asyncio
+import copy
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -94,6 +95,40 @@ class Database:
             doc["original_markdown"] = original_markdown
         self.resumes.insert(doc)
         return doc
+
+    def clone_resume(self, source_resume_id: str) -> dict[str, Any]:
+        """Clone an existing resume into a new standalone resume record."""
+        source = self.get_resume(source_resume_id)
+        if not source:
+            raise ValueError(f"Resume not found: {source_resume_id}")
+
+        cloned = copy.deepcopy(dict(source))
+        cloned.pop("doc_id", None)
+        cloned.pop("eid", None)
+        now = datetime.now(timezone.utc).isoformat()
+
+        source_title = source.get("title")
+        source_filename = source.get("filename")
+        if isinstance(source_title, str) and source_title.strip():
+            cloned_title = f"Copy of {source_title.strip()}"
+        elif isinstance(source_filename, str) and source_filename.strip():
+            cloned_title = f"Copy of {source_filename.strip()}"
+        else:
+            cloned_title = "Copy of Resume"
+
+        cloned.update(
+            {
+                "resume_id": str(uuid4()),
+                "is_master": False,
+                "parent_id": None,
+                "title": cloned_title,
+                "created_at": now,
+                "updated_at": now,
+            }
+        )
+
+        self.resumes.insert(cloned)
+        return cloned
 
     async def create_resume_atomic_master(
         self,

@@ -384,6 +384,16 @@ export async function retryProcessing(resumeId: string): Promise<ResumeUploadRes
   return res.json();
 }
 
+/** Clones an existing resume into a new standalone resume */
+export async function cloneResume(resumeId: string): Promise<ResumeUploadResponse> {
+  const res = await apiPost(`/resumes/${encodeURIComponent(resumeId)}/clone`, {});
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to clone resume (status ${res.status}): ${text}`);
+  }
+  return res.json();
+}
+
 /** Fetches the job description used to tailor a resume */
 export async function fetchJobDescription(resumeId: string): Promise<{
   job_id: string;
